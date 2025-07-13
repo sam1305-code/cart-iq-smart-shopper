@@ -19,10 +19,19 @@ export function VoiceAssistant({ isListening, onToggleListening, onVoiceCommand 
       const timer = setTimeout(() => {
         const mockCommands = [
           "Show me eco-friendly alternatives",
-          "What's the carbon footprint of my cart?",
+          "What's the carbon footprint of my cart?", 
           "Find organic options",
-          "Add sustainable laundry detergent",
-          "How can I reduce my environmental impact?"
+          "Where can I find almond milk?",
+          "Is there a better alternative to regular detergent?",
+          "What aisle is the pasta in?",
+          "Do you have any sulfate-free shampoo?",
+          "Show me local and sustainable options",
+          "What's the healthiest bread you have?",
+          "Where are the cleaning supplies located?",
+          "Are there any plant-based alternatives to this?",
+          "What's the most eco-friendly laundry option?",
+          "How can I reduce my environmental impact?",
+          "Show me products with less packaging"
         ];
         const randomCommand = mockCommands[Math.floor(Math.random() * mockCommands.length)];
         setCurrentTranscript(randomCommand);

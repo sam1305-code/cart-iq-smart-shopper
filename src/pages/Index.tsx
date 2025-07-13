@@ -7,6 +7,7 @@ import { ProductCard } from '@/components/ProductCard';
 import { ScannerInterface } from '@/components/ScannerInterface';
 import { CartSummary } from '@/components/CartSummary';
 import { useToast } from '@/hooks/use-toast';
+import { processVoiceCommand } from '@/utils/voiceCommands';
 import heroImage from '@/assets/cart-hero.jpg';
 
 // Mock product database
@@ -118,19 +119,67 @@ const Index = () => {
   const handleVoiceCommand = useCallback((command: string) => {
     setIsListening(false);
     
-    if (command.toLowerCase().includes('eco') || command.toLowerCase().includes('sustainable')) {
-      toast({
-        title: "🌱 Eco Assistant",
-        description: "I found some sustainable alternatives for you!",
-      });
-      setCurrentView('scanner');
-    } else if (command.toLowerCase().includes('cart') || command.toLowerCase().includes('checkout')) {
-      setCurrentView('cart');
-    } else if (command.toLowerCase().includes('scan') || command.toLowerCase().includes('barcode')) {
-      setCurrentView('scanner');
-      setIsScanning(true);
+    // Process the voice command using our enhanced processor
+    const result = processVoiceCommand(command);
+    
+    // Show the response to user
+    toast({
+      title: getCommandTypeIcon(result.type) + " " + getCommandTypeTitle(result.type),
+      description: result.response,
+    });
+    
+    // Handle different actions
+    switch (result.action) {
+      case 'show_map':
+      case 'show_alternatives':
+      case 'show_scanner':
+      case 'prompt_scan':
+        setCurrentView('scanner');
+        break;
+      case 'show_carbon_details':
+      case 'show_eco_products':
+        if (cartItems.length > 0) {
+          setCurrentView('cart');
+        } else {
+          setCurrentView('scanner');
+        }
+        break;
+      case 'show_help':
+        // Stay on current view, just show helpful message
+        break;
     }
-  }, [toast]);
+    
+    // If it's a detergent alternative query, simulate scanning a detergent
+    if (result.data === 'detergent') {
+      setTimeout(() => handleProductScanned('012345678901'), 1000);
+    }
+    // If it's a shampoo alternative query, simulate scanning shampoo  
+    if (result.data === 'shampoo') {
+      setTimeout(() => handleProductScanned('456789012345'), 1000);
+    }
+  }, [toast, cartItems.length]);
+  
+  const getCommandTypeIcon = (type: string) => {
+    switch (type) {
+      case 'location': return '📍';
+      case 'alternatives': return '🌱';
+      case 'availability': return '✅';
+      case 'eco': return '♻️';
+      case 'carbon': return '🌍';
+      default: return '🤖';
+    }
+  };
+  
+  const getCommandTypeTitle = (type: string) => {
+    switch (type) {
+      case 'location': return 'Store Navigation';
+      case 'alternatives': return 'Eco Alternatives';
+      case 'availability': return 'Product Availability';
+      case 'eco': return 'Sustainability Assistant';
+      case 'carbon': return 'Carbon Impact';
+      default: return 'EcoCart Assistant';
+    }
+  };
 
   const handleProductScanned = useCallback((barcode: string) => {
     setIsScanning(false);
